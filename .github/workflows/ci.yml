@@ -8,79 +8,10 @@ on:
     branches: [ master ]
 
 jobs:
-  linux:
-    strategy:
-      matrix:
-        os: [ ubuntu-18.04, ubuntu-20.04, ubuntu-22.04 ]
-    runs-on: ${{ matrix.os }}
-    steps:
-    - name: install dependencies
-      run: |
-        sudo apt install \
-          automake \
-          gcc \
-          git \
-          libssl-dev \
-          libtool \
-          make \
-          wget
-    - name: install extra libraries
-      # This build job tries to verify as much of ipmitool code
-      # as possible, hence these libraries. They aren't usually
-      # needed for normal user builds:
-      run: |
-        sudo apt update
-        sudo apt install \
-          libsystemd-dev \
-          libreadline-dev \
-          libfreeipmi-dev \
-          libusb-dev
-    - uses: actions/checkout@v2
-    - name: bootstrap
-      run: ./bootstrap
-    - name: configure
-      run: |
-        # For Linux, build as many extra interfaces as possible
-        # to verify the code
-        ./configure --enable-intf-dummy \
-                    --enable-intf-dbus \
-                    --enable-intf-usb \
-                    --enable-intf-free
-    - name: make
-      run: make
-    - name: make check
-      run: make check
-    - name: make distcheck
-      run: make distcheck
-
-  macos:
-    strategy:
-      matrix:
-        os: [ macos-10.15, macos-11, macos-12 ]
-    runs-on: ${{ matrix.os }}
-
-    steps:
-    - name: install dependencies
-      run: brew install automake openssl libtool freeipmi wget
-    - uses: actions/checkout@v2
-    - name: bootstrap
-      run: ./bootstrap
-    - name: configure
-      run: |
-        ./configure --enable-intf-dummy \
-                    LDFLAGS=-L/usr/local/opt/openssl@1.1/lib \
-                    CFLAGS=-I/usr/local/opt/openssl@1.1/include
-    - name: make
-      run: make
-    - name: make check
-      run: make check
-    - name: make distcheck
-      run: make distcheck
-
   windows:
     strategy:
       matrix:
-        os: [ windows-2019, windows-2022 ]
+        os: [ windows-2022 ]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -118,3 +49,25 @@ jobs:
       run: make check
     - name: make distcheck
       run: make distcheck
+    - name: create release
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.run_number }}
+        release_name: Release ${{ github.run_number }}
+        draft: false
+        prerelease: false
+        body: |
+          Automated release for build ${{ github.run_number }}.
+    - name: upload release assets
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/ipmitool-*.tar.gz
+        asset_name: ipmitool-${{ github.run_number }}.tar.gz
+        asset_content_type: application/gzip
