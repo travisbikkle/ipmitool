@@ -50,8 +50,10 @@ jobs:
       run: make check
     - name: make distcheck
       run: make distcheck
-    - name: list all files in ipmitool directory
-      run: dir "D:\a\ipmitool\ipmitool" /s
+    - name: list files
+      run: |
+        cd D:\a\ipmitool\ipmitool
+        ls -R
     - name: create release
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       id: create_release
