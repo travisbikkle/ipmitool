@@ -9,7 +9,7 @@ on:
     branches: [ master ]
 
 jobs:
-  windows:
+  build:
     strategy:
       matrix:
         os: [ windows-2022 ]
@@ -54,6 +54,8 @@ jobs:
       run: |
         cd D:\a\ipmitool\ipmitool
         ls -R
+        src/.deps/ipmitool.exe -V
+        exit 0
     - name: create release
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       id: create_release
@@ -74,6 +76,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ipmitool-1.8.19.0.gsnapshot.tar.gz
+        asset_path: src/.deps/ipmitool.exe
         asset_name: ipmitool-${{ github.run_number }}.tar.gz
         asset_content_type: application/gzip
