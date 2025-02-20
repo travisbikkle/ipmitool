@@ -52,7 +52,8 @@ jobs:
       run: make distcheck
     - name: zip files
       run: |
-        Compress-Archive -Path C:/tools/cygwin/bin/cygcrypto-3.dll,C:/tools/cygwin/bin/cyggcc_s-seh-1.dll,C:/tools/cygwin/bin/cygncursesw-10.dll,C:/tools/cygwin/bin/cygreadline7.dll,C:/tools/cygwin/bin/cygwin1.dll,C:/tools/cygwin/bin/cygz.dll,src/.libs/ipmitool.exe -DestinationPath ipmitool-${{ github.run_number }}.zip
+        wget http://www.iana.org/assignments/enterprise-numbers.txt -O enterprise-numbers
+        Compress-Archive -Path C:/tools/cygwin/bin/cygcrypto-3.dll,C:/tools/cygwin/bin/cyggcc_s-seh-1.dll,C:/tools/cygwin/bin/cygncursesw-10.dll,C:/tools/cygwin/bin/cygreadline7.dll,C:/tools/cygwin/bin/cygwin1.dll,C:/tools/cygwin/bin/cygz.dll,src/.libs/ipmitool.exe,enterprise-numbers -DestinationPath ipmitool-${{ github.run_number }}.zip
     - name: create release
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       id: create_release
