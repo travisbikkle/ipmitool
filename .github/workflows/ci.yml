@@ -50,8 +50,11 @@ jobs:
       run: make check
     - name: make distcheck
       run: make distcheck
+    - name: list dist files
+      run: dir dist
     - name: create release
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
