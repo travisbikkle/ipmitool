@@ -50,12 +50,9 @@ jobs:
       run: make check
     - name: make distcheck
       run: make distcheck
-    - name: list files
+    - name: zip files
       run: |
-        cd D:\a\ipmitool\ipmitool
-        ls -R
-        src/.deps/ipmitool.exe -V
-        exit 0
+        Compress-Archive -Path C:/tools/cygwin/bin/cygcrypto-3.dll,C:/tools/cygwin/bin/cyggcc_s-seh-1.dll,C:/tools/cygwin/bin/cygncursesw-10.dll,C:/tools/cygwin/bin/cygreadline7.dll,C:/tools/cygwin/bin/cygwin1.dll,C:/tools/cygwin/bin/cygz.dll,src/.libs/ipmitool.exe -DestinationPath ipmitool-${{ github.run_number }}.zip
     - name: create release
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       id: create_release
@@ -76,6 +73,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: src/.deps/ipmitool.exe
-        asset_name: ipmitool-${{ github.run_number }}.tar.gz
+        asset_path: ipmitool-${{ github.run_number }}.zip
+        asset_name: ipmitool-${{ github.run_number }}.zip
         asset_content_type: application/gzip
